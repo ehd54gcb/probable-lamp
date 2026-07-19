@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light only">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>消耗型库存生成器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{padding:24px;max-width:700px;margin:0 auto;background:#f4f5f7}
+.box{background:#fff;padding:20px;border-radius:12px;margin-bottom:16px;box-shadow:0 1px 6px #00000012}
+h3{margin-bottom:12px;color:#222;font-size:18px}
+.info{color:#d93025;font-weight:bold;margin:8px 0}
+input,button{width:100%;padding:12px;margin:8px 0;font-size:15px;border-radius:8px;border:1px solid #ddd}
+button{border:none;color:#fff}
+#genBtn{background:#2563eb}
+#resetBtn{background:#666}
+#copyBtn{background:#059669}
+#result{
+    background:#fff;
+    color:#000;
+    border:1px solid #ccc;
+    padding:14px;
+    min-height:200px;
+    white-space:pre-wrap;
+    font-size:15px;
+}
+</style>
+</head>
+<body>
+<div class="box">
+    <h3>库存生成工具</h3>
+    <div class="info" id="stockTip">剩余库存：0 条</div>
+    <label>生成数量：</label>
+    <input type="number" id="num" value="5" min="1">
+    <button id="genBtn" onclick="create()">开始生成（抽取后删除库存）</button>
+    <button id="resetBtn" onclick="resetStock()">重置全部库存</button>
+    <button id="copyBtn" onclick="copyRes()">复制所有结果</button>
+</div>
+
+<div class="box">
+    <h4>生成记录（已消耗库存）</h4>
+    <div id="result"></div>
+</div>
+
+<script>
+// ==========【原始库存，在这里修改你的全部素材】==========
+const originalStock = [
+    "data001",
+    "data002",
+    "data003",
+    "abc666",
+    "xyz888",
+    "test999",
+    "xinhenb666"
+];
+// =======================================================
+
+// 当前可用库存（运行中会不断减少）
+let usableStock = [...originalStock];
+const resultBox = document.getElementById("result");
+const tipBox = document.getElementById("stockTip");
+
+// 刷新剩余库存提示
+function updateTip(){
+    tipBox.innerText = "剩余库存：" + usableStock.length + " 条";
+}
+updateTip();
+
+// 生成核心逻辑：抽取后直接删除
+function create(){
+    const count = Number(document.getElementById("num").value);
+    if(usableStock.length === 0){
+        alert("库存已全部抽完，请点击重置库存！");
+        return;
+    }
+    let out = "";
+    let takeNum = count;
+    // 防止想要生成的数量超过剩余库存
+    if(takeNum > usableStock.length) takeNum = usableStock.length;
+
+    for(let i=0;i<takeNum;i++){
+        // 随机下标
+        let randomIdx = Math.floor(Math.random() * usableStock.length);
+        // 取出元素，同时从库存删除
+        let pickItem = usableStock.splice(randomIdx, 1)[0];
+        out += pickItem + "\n";
+    }
+    // 追加到结果框
+    resultBox.innerText += out;
+    // 更新剩余数量
+    updateTip();
+    if(usableStock.length === 0){
+        alert("当前库存已全部消耗完毕！");
+    }
+}
+
+// 重置库存，恢复原始所有素材
+function resetStock(){
+    usableStock = [...originalStock];
+    resultBox.innerText = "";
+    updateTip();
+    alert("库存已重置清空记录！");
+}
+
+// 复制结果
+function copyRes(){
+    let text = resultBox.innerText.trim();
+    if(!text){
+        alert("暂无生成内容");
+        return;
+    }
+    navigator.clipboard.writeText(text).then(()=>alert("复制成功"));
+}
+</script>
+</body>
+</html>
